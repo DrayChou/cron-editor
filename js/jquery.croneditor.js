@@ -1,26 +1,131 @@
 $.fn.croneditor = function(opts) {
 
+// HTML Template for plugin
+var tmpl = '<input type="button" value="重置" id="clear"/>\
+<br/>\
+<!-- TODO: add back next estimated time -->\
+<!-- <span>Will run next at:<em><span class="next"></span></em></span> -->\
+<!-- the cron editor will be here -->\
+<div id="tabs" class="tabs">\
+  <ul>\
+    <li><a href="#tabs-minute">分钟</a></li>\
+    <li><a href="#tabs-hour">小时</a></li>\
+    <li><a href="#tabs-day">天</a></li>\
+    <li><a href="#tabs-month">月</a></li>\
+    <li><a href="#tabs-week">星期</a></li>\
+  </ul>\
+  <div id="tabs-minute">\
+    <div class="tabs">\
+      <ul>\
+        <li id="button-minute-every"><a href="#tabs-minute-every">每分钟</a></li>\
+        <li id="button-minute-n"><a href="#tabs-minute-n">每隔几分钟</a></li>\
+        <li id="button-minute-each"><a href="#tabs-minute-each">每到某几个分钟</a></li>\
+      </ul>\
+      <div id="tabs-minute-every" class="preview">\
+        <div>*</div>\
+        <div>Every minute.</div>\
+      </div>\
+      <div id="tabs-minute-n">\
+        <div class="preview"> Every 1 minutes</div>\
+        <div class="slider"></div>\
+      </div>\
+      <div id="tabs-minute-each" class="preview">\
+        <div>Each selected minute</div><br/>\
+        <div class="tabs-minute-format"></div>\
+      </div>\
+    </div>\
+  </div>\
+  <div id="tabs-hour">\
+    <div class="tabs">\
+      <ul>\
+        <li id="button-hour-every"><a href="#tabs-hour-every">每小时</a></li>\
+        <li id="button-hour-n"><a href="#tabs-hour-n">每隔几小时</a></li>\
+        <li id="button-hour-each"><a href="#tabs-hour-each">每到某几个小时</a></li>\
+      </ul>\
+      <div id="tabs-hour-every" class="preview">\
+        <div>*</div>\
+        <div>Every hour</div>\
+      </div>\
+      <div id="tabs-hour-n">\
+        <div class="preview">Every 1 hours</div>\
+        <div class="slider"></div>\
+      </div>\
+      <div id="tabs-hour-each" class="preview">\
+        <div>Each selected hour</div><br/>\
+        <div class="tabs-hour-format"></div>\
+      </div>\
+    </div>\
+  </div>\
+  <div id="tabs-day">\
+    <div class="tabs">\
+      <ul>\
+        <li id="button-day-every"><a href="#tabs-day-every">每天</a></li>\
+        <li id="button-day-each"><a href="#tabs-day-each">每到某几天</a></li>\
+      </ul>\
+      <div id="tabs-day-every" class="preview">\
+        <div>*</div>\
+        <div>Every Day</div>\
+      </div>\
+      <div id="tabs-day-each" class="preview">\
+        <div>Each selected Day</div><br/>\
+        <div class="tabs-day-format"></div>\
+      </div>\
+    </div>\
+  </div>\
+  <div id="tabs-month">\
+    <div class="tabs">\
+      <ul>\
+        <li id="button-month-every"><a href="#tabs-month-every">每月</a></li>\
+        <li id="button-month-each"><a href="#tabs-month-each">每到某几月</a></li>\
+      </ul>\
+      <div id="tabs-month-every" class="preview">\
+        <div>*</div>\
+        <div>Every month</div>\
+      </div>\
+      <div id="tabs-month-each" class="preview">\
+        <div>Each selected month</div><br/>\
+        <div class="tabs-month-format"></div>\
+      </div>\
+    </div>\
+  </div>\
+  <div id="tabs-week">\
+    <div class="tabs">\
+      <ul>\
+        <li id="button-week-every"><a href="#tabs-week-every">每星期</a></li>\
+        <li id="button-week-each"><a href="#tabs-week-each">每到某几个星期</a></li>\
+      </ul>\
+      <div id="tabs-week-every" class="preview">\
+        <div>*</div>\
+        <div>Every Day</div>\
+      </div>\
+      <div id="tabs-week-each">\
+        <div class="preview">Each selected Day</div><br/>\
+        <div class="tabs-week-format"></div>\
+      </div>\
+    </div>\
+  </div>\
+</div>';
+
   var el = this;
-  
+
   // Write the HTML template to the document
   $(el).html(tmpl);
 
-  var cronArr = ["*", "*", "*", "*", "*", "*"];
+  var cronArr = ["*", "*", "*", "*", "*"];
   if (typeof opts.value === "string") {
     cronArr = opts.value.split(' ');
+  }
+
+  if (typeof opts.cronString === "object") {
+    cronString = $(opts.cronString);
+  } else {
+    cronString = $('#cronString');
+    tmpl = '<input type="text" id="cronString" value="* * * * *" size="80"/><br/>' + tmpl;
   }
 
   $( ".tabs" ).tabs({
     activate: function( event, ui ) {
       switch ($(ui.newTab).attr('id')) {
-
-        // Seconds
-        case 'button-second-every':
-          cronArr[0] = "*";
-        break;
-        case 'button-second-n':
-          cronArr[0] = "*/" + $( "#tabs-second .slider" ).slider("value");
-        break;
 
         // Minutes
         case 'button-minute-every':
@@ -89,7 +194,7 @@ $.fn.croneditor = function(opts) {
   function drawCron () {
 
     var newCron = cronArr.join(' ');
-    $('#cronString').val(newCron);
+    cronString.val(newCron);
     // TODO: add back next estimated cron time
     /*
     var last = new Date();
@@ -104,27 +209,16 @@ $.fn.croneditor = function(opts) {
     }, 500);
     */
     /*
-    $('#cronString').keyup(function(){
-      cronArr = $('#cronString').val().split(' ');
+    cronString.keyup(function(){
+      cronArr = cronString.val().split(' ');
       console.log('updated', cronArr)
     });
     */
   }
 
   $('#clear').click(function(){
-    $('#cronString').val('* * * * * *');
-    cronArr = ["*","*","*","*","*", "*"];
-    
-  });
-
-  $( "#tabs-second .slider" ).slider({
-    min: 1,
-    max: 59,
-    slide: function( event, ui ) {
-      cronArr[0] = "*/" + ui.value;
-      $('#tabs-second-n .preview').html('Every ' + ui.value + ' seconds');
-      drawCron();
-    }
+    cronString.val('* * * * *');
+    cronArr = ["*","*","*","*","*"];
   });
 
   $( "#tabs-minute .slider" ).slider({
@@ -187,7 +281,7 @@ $.fn.croneditor = function(opts) {
     });
 
   }
-  
+
 
   function drawEachHours () {
     // hours
@@ -275,7 +369,7 @@ $.fn.croneditor = function(opts) {
 
   function drawEachMonths () {
     // months
-    var months = [null, 'Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    var months = [null, '一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
     for (var i = 1; i < 13; i++) {
       var padded = i;
@@ -316,7 +410,7 @@ $.fn.croneditor = function(opts) {
 
   function drawEachWeek () {
     // weeks
-    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var days = ['星期天', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
     for (var i = 0; i < 7; i++) {
       var padded = i;
       if(padded.toString().length === 1) {
@@ -361,129 +455,3 @@ $.fn.croneditor = function(opts) {
   drawEachMonths();
   drawCron();
 };
-
-// HTML Template for plugin
-var tmpl = '<input type="text" id="cronString" value="* * * * * *" size="80"/>\
-<br/>\
-<input type="button" value="Reset" id="clear"/>\
-<br/>\
-<span style="font-size:18px;font-style:italic;"><strong>Note:</strong> If your Cron manager does not support seconds you will need to ignore the first parameter of the generated Cron</span><br/><br/>\
-<!-- TODO: add back next estimated time -->\
-<!-- <span>Will run next at:<em><span class="next"></span></em></span> -->\
-<!-- the cron editor will be here -->\
-<div id="tabs" class="tabs">\
-  <ul>\
-    <li><a href="#tabs-second">Second</a></li>\
-    <li><a href="#tabs-minute">Minute</a></li>\
-    <li><a href="#tabs-hour">Hour</a></li>\
-    <li><a href="#tabs-day">Day of Month</a></li>\
-    <li><a href="#tabs-month">Month</a></li>\
-    <li><a href="#tabs-week">Day of Week</a></li>\
-  </ul>\
-  <div id="tabs-second">\
-    <div class="tabs">\
-      <ul>\
-        <li id="button-second-every"><a href="#tabs-second-every">Every second</a></li>\
-        <li id="button-second-n"><a href="#tabs-second-n">Every n seconds</a></li>\
-      </ul>\
-      <div id="tabs-second-every" class="preview">\
-        <div>*</div>\
-        <div>Every second.</div>\
-      </div>\
-      <div id="tabs-second-n">\
-        <div class="preview"> Every 1 seconds</div>\
-        <div class="slider"></div>\
-      </div>\
-    </div>\
-  </div>\
-  <div id="tabs-minute">\
-    <div class="tabs">\
-      <ul>\
-        <li id="button-minute-every"><a href="#tabs-minute-every">Every Minute</a></li>\
-        <li id="button-minute-n"><a href="#tabs-minute-n">Every n minutes</a></li>\
-        <li id="button-minute-each"><a href="#tabs-minute-each">Each Selected Minute</a></li>\
-      </ul>\
-      <div id="tabs-minute-every" class="preview">\
-        <div>*</div>\
-        <div>Every minute.</div>\
-      </div>\
-      <div id="tabs-minute-n">\
-        <div class="preview"> Every 1 minutes</div>\
-        <div class="slider"></div>\
-      </div>\
-      <div id="tabs-minute-each" class="preview">\
-        <div>Each selected minute</div><br/>\
-        <div class="tabs-minute-format"></div>\
-      </div>\
-    </div>\
-  </div>\
-  <div id="tabs-hour">\
-    <div class="tabs">\
-      <ul>\
-        <li id="button-hour-every"><a href="#tabs-hour-every">Every Hour</a></li>\
-        <li id="button-hour-n"><a href="#tabs-hour-n">Every n Hours</a></li>\
-        <li id="button-hour-each"><a href="#tabs-hour-each">Each Selected Hour</a></li>\
-      </ul>\
-      <div id="tabs-hour-every" class="preview">\
-        <div>*</div>\
-        <div>Every hour</div>\
-      </div>\
-      <div id="tabs-hour-n">\
-        <div class="preview">Every 1 hours</div>\
-        <div class="slider"></div>\
-      </div>\
-      <div id="tabs-hour-each" class="preview">\
-        <div>Each selected hour</div><br/>\
-        <div class="tabs-hour-format"></div>\
-      </div>\
-    </div>\
-  </div>\
-  <div id="tabs-day">\
-    <div class="tabs">\
-      <ul>\
-        <li id="button-day-every"><a href="#tabs-day-every">Every Day</a></li>\
-        <li id="button-day-each"><a href="#tabs-day-each">Each Day</a></li>\
-      </ul>\
-      <div id="tabs-day-every" class="preview">\
-        <div>*</div>\
-        <div>Every Day</div>\
-      </div>\
-      <div id="tabs-day-each" class="preview">\
-        <div>Each selected Day</div><br/>\
-        <div class="tabs-day-format"></div>\
-      </div>\
-    </div>\
-  </div>\
-  <div id="tabs-month">\
-    <div class="tabs">\
-      <ul>\
-        <li id="button-month-every"><a href="#tabs-month-every">Every Month</a></li>\
-        <li id="button-month-each"><a href="#tabs-month-each">Each Month</a></li>\
-      </ul>\
-      <div id="tabs-month-every" class="preview">\
-        <div>*</div>\
-        <div>Every month</div>\
-      </div>\
-      <div id="tabs-month-each" class="preview">\
-        <div>Each selected month</div><br/>\
-        <div class="tabs-month-format"></div>\
-      </div>\
-    </div>\
-  </div>\
-  <div id="tabs-week">\
-    <div class="tabs">\
-      <ul>\
-        <li id="button-week-every"><a href="#tabs-week-every">Every Week</a></li>\
-        <li id="button-week-each"><a href="#tabs-week-each">Each Week</a></li>\
-      </ul>\
-      <div id="tabs-week-every" class="preview">\
-        <div>*</div>\
-        <div>Every Day</div>\
-      </div>\
-      <div id="tabs-week-each">\
-        <div class="preview">Each selected Day</div><br/>\
-        <div class="tabs-week-format"></div>\
-      </div>\
-    </div>\
-  </div>\
-</div>';
